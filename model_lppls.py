@@ -90,7 +90,7 @@ class ModelLPPLS:
         )
     def _check_qualified_fit(self, tc: float, m: float, omega: float) -> bool:
         """
-        Filimonov–Sornette (2013) qualified fit constraints (Table 3, right side).
+        Filimonov–Sornette (2013) qualified fit constraints.
 
         tc must lie within (-60, 252) days relative to the last observation.
         m must lie in (0, 1)
