@@ -225,8 +225,8 @@ class ModelLPPLS:
 
  
     def summary(self, calibration_date=None):
-     """
-     Return fitted parameters and key derived metrics as a one-row DataFrame.
+        """
+        Return fitted parameters and key derived metrics as a one-row DataFrame.
 
         Parameters
         ----------
