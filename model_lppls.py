@@ -223,8 +223,8 @@ class ModelLPPLS:
         self.fitted = True
         return self
 
-
-  def summary(self, calibration_date=None):
+ 
+    def summary(self, calibration_date=None):
      """
      Return fitted parameters and key derived metrics as a one-row DataFrame.
 
