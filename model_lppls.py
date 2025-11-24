@@ -145,72 +145,84 @@ class ModelLPPLS:
             self.fitted = False
 
         return self
-
     
-    def fit_multistart(self, n_runs: int = 10):
-        """
-        Robust multistart fitting: run several fits with randomized initial guesses
-        and keep the best run (lowest RMSE) among those that pass the qualified-fit check.
+   def fit_multistart(self, n_runs: int = 10, tol: float = 0.01):
+    """
+    Robust multistart fitting: run several fits with randomized initial guesses
+    and keep the best run (lowest RMSE) among those that pass the qualified-fit check.
 
-        - n_runs : number of random starting points (default 10)
-        - Random draws:
-            m ~ Uniform(0,1)
-            omega ~ Uniform(1,50)
-            tc0 = t_last + Uniform(0.01, 0.5)
-        - Calls self.fit(initial_guess) (no method/options passed)
-        - Allows negative B (do not force sign of B)
-        """
-        best = None
-        best_rmse = np.inf
+    - n_runs : number of random starting points (default 10)
+    - tol : early-stop RMSE threshold (default 0.01)
+            If any qualified fit reaches RMSE < tol, stop early.
 
-        for _ in range(int(n_runs)):
-            # Randomized initial guess
-            tc0 = self.t[-1] + float(np.random.uniform(0.01, 0.5))
-            m0 = float(np.random.uniform(0.0, 1.0))
-            omega0 = float(np.random.uniform(1.0, 50.0))
+    Random draws:
+        m ~ Uniform(0,1)
+        omega ~ Uniform(1,50)
+        tc0 = t_last + Uniform(0.01, 0.5)
 
-            try:
-                candidate = ModelLPPLS(self.t, self.p)  # fresh instance
-                candidate.fit([tc0, m0, omega0])        # DO NOT pass method/options here
-            except Exception:
-                # any error -> skip this run
-                continue
+    Calls self.fit(initial_guess) (no method/options passed).
+    Allows negative B (no bubble direction restriction).
+    """
 
-            # Keep only candidates that passed qualified-fit constraints
-            if not candidate.fitted:
-                continue
+    best = None
+    best_rmse = np.inf
 
-            # compute candidate RMSE on the fitting window
-            pars = candidate.params
-            y_pred = candidate.lppls(self.t, pars["A"], pars["B"], pars["C1"], pars["C2"],
-                                     pars["tc"], pars["m"], pars["omega"])
-            rmse = np.sqrt(np.mean((self.logp - y_pred) ** 2))
+    for _ in range(int(n_runs)):
+        # Randomized initial guess
+        tc0 = self.t[-1] + float(np.random.uniform(0.01, 0.5))
+        m0 = float(np.random.uniform(0.0, 1.0))
+        omega0 = float(np.random.uniform(1.0, 50.0))
 
-            # compute R^2 as an additional (optional) diagnostic
-            ss_res = np.sum((self.logp - y_pred) ** 2)
-            ss_tot = np.sum((self.logp - np.mean(self.logp)) ** 2)
-            r2 = 1 - ss_res / ss_tot if ss_tot != 0 else np.nan
+        try:
+            candidate = ModelLPPLS(self.t, self.p)  # fresh instance
+            candidate.fit([tc0, m0, omega0])        # DO NOT pass method/options
+        except Exception:
+            continue
 
-            # Candidate is eligible if it passed qualified-fit; selection is by RMSE
-            if np.isfinite(rmse) and rmse < best_rmse:
-                best_rmse = rmse
-                best = {
-                    "model": candidate,
-                    "rmse": float(rmse),
-                    "r2": float(r2),
-                }
+        # must pass qualified-fit
+        if not candidate.fitted:
+            continue
 
-        if best is None:
-            # No successful qualified-fit run found
-            self.fitted = False
-            raise RuntimeError("fit_multistart: no qualified fit found in any random start.")
+        # compute RMSE
+        pars = candidate.params
+        y_pred = candidate.lppls(
+            self.t, pars["A"], pars["B"], pars["C1"], pars["C2"],
+            pars["tc"], pars["m"], pars["omega"]
+        )
+        rmse = np.sqrt(np.mean((self.logp - y_pred) ** 2))
 
-        # adopt the best candidate's results into self
-        chosen = best["model"]
-        self.params = chosen.params
-        self.result = chosen.result
-        self.fitted = True
-        return self
+        # early stop if RMSE good enough
+        if rmse < tol:
+            self.params = candidate.params
+            self.result = candidate.result
+            self.fitted = True
+            return self
+
+        # compute R^2 (same as before)
+        ss_res = np.sum((self.logp - y_pred) ** 2)
+        ss_tot = np.sum((self.logp - np.mean(self.logp)) ** 2)
+        r2 = 1 - ss_res / ss_tot if ss_tot != 0 else np.nan
+
+        # keep best RMSE so far
+        if np.isfinite(rme := rmse) and rmse < best_rmse:
+            best_rmse = rmse
+            best = {
+                "model": candidate,
+                "rmse": float(rmse),
+                "r2": float(r2),
+            }
+
+    if best is None:
+        self.fitted = False
+        raise RuntimeError("fit_multistart: no qualified fit found in any random start.")
+
+    # adopt best candidate
+    chosen = best["model"]
+    self.params = chosen.params
+    self.result = chosen.result
+    self.fitted = True
+    return self
+
 
     def summary(self, calibration_date=None):
         """
