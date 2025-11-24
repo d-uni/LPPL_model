@@ -212,16 +212,16 @@ class ModelLPPLS:
                 "r2": float(r2),
             }
 
-       if best is None:
-        self.fitted = False
-        raise RuntimeError("fit_multistart: no qualified fit found in any random start.")
+        if best is None:
+         self.fitted = False
+         raise RuntimeError("fit_multistart: no qualified fit found in any random start.")
 
-       # adopt best candidate
-       chosen = best["model"]
-       self.params = chosen.params
-       self.result = chosen.result
-       self.fitted = True
-       return self
+        # adopt best candidate
+        chosen = best["model"]
+        self.params = chosen.params
+        self.result = chosen.result
+        self.fitted = True
+        return self
 
 
  def summary(self, calibration_date=None):
