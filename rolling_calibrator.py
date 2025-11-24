@@ -28,26 +28,6 @@ class RollingLPPLCalibrator:
         self.model_params = None
         self.acceptance_criteria = None
 
-    # ---------- Configuration ---------- #
-    def set_model_params_initial_guess(self, tc_offset, m0, omega0):
-        """
-        Set the initial guess configuration for model fitting.
-
-        Parameters
-        ----------
-        tc_offset : float
-            Offset added to the last time point of each window for initial t_c guess.
-        m0 : float
-            Initial guess for exponent m (typically between 0.1 and 0.9).
-        omega0 : float
-            Initial guess for angular log-periodic frequency (typically between 6 and 13).
-        """
-        self.model_params = {
-            "tc_offset": tc_offset,
-            "m0": m0,
-            "omega0": omega0,
-        }
-
     def set_acceptance_thresholds(self, r2_min, rmse_max, kappa_min, tc_horizon_years):
         """
         Define criteria to accept or reject fitted LPPLS models.
@@ -77,16 +57,11 @@ class RollingLPPLCalibrator:
         ss_tot = np.sum((y_true - np.mean(y_true)) ** 2)
         return 1 - ss_res / ss_tot if ss_tot != 0 else np.nan
 
-    def _fit_window(self, t, p):
-        """Fit LPPLS model on a single rolling window."""
-        initial_guess = [
-            t[-1] + self.model_params["tc_offset"],
-            self.model_params["m0"],
-            self.model_params["omega0"],
-        ]
+    def _fit_window(self, t, p, n_runs: int = 10, tol: float = 0.01):
+        """Fit LPPLS model on a single rolling window using multistart."""
         model = ModelLPPLS(t, p)
         try:
-            model.fit(initial_guess)
+            model.fit_multistart(n_runs=n_runs, tol=tol)
         except Exception:
             return None
         return model if model.fitted else None
