@@ -240,21 +240,21 @@ class ModelLPPLS:
             One-row DataFrame containing:
             calibration_date, tc, A, B, C1, C2, m, omega, r2, rmse, kappa, sign
         """
-         if not self.fitted:
+        if not self.fitted:
             raise RuntimeError("Fit the model first using .fit(initial_guess).")
 
          # --- Extract fitted parameters ---
-         A, B, C1, C2, tc, m, omega = (
+        A, B, C1, C2, tc, m, omega = (
             self.params["A"], self.params["B"], self.params["C1"], self.params["C2"],
             self.params["tc"], self.params["m"], self.params["omega"]
          )
 
          # --- Derived parameters ---
-         kappa = -B
-         sign = 1 if kappa > 0 else -1
+        kappa = -B
+        sign = 1 if kappa > 0 else -1
 
          # --- Build DataFrame row ---
-         row = {
+        row = {
             "calibration_date": self.calibration_date,
             "tc": tc,
             "A": A,
@@ -265,6 +265,6 @@ class ModelLPPLS:
             "omega": omega,
             "kappa": kappa,
             "sign": sign,
-         }
+        }
 
-         return pd.DataFrame([row])
+        return pd.DataFrame([row])
