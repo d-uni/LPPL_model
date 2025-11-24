@@ -160,14 +160,14 @@ class ModelLPPLS:
          omega ~ Uniform(1,50)
          tc0 = t_last + Uniform(0.01, 0.5)
 
-       Calls self.fit(initial_guess) (no method/options passed).
-       Allows negative B (no bubble direction restriction).
-       """
+        Calls self.fit(initial_guess) (no method/options passed).
+        Allows negative B (no bubble direction restriction).
+        """
 
-       best = None
-       best_rmse = np.inf
+        best = None
+        best_rmse = np.inf
 
-       for _ in range(int(n_runs)):
+        for _ in range(int(n_runs)):
          # Randomized initial guess
          tc0 = self.t[-1] + float(np.random.uniform(0.01, 0.5))
          m0 = float(np.random.uniform(0.0, 1.0))
@@ -212,16 +212,16 @@ class ModelLPPLS:
                 "r2": float(r2),
             }
 
-     if best is None:
+       if best is None:
         self.fitted = False
         raise RuntimeError("fit_multistart: no qualified fit found in any random start.")
 
-     # adopt best candidate
-     chosen = best["model"]
-     self.params = chosen.params
-     self.result = chosen.result
-     self.fitted = True
-     return self
+       # adopt best candidate
+       chosen = best["model"]
+       self.params = chosen.params
+       self.result = chosen.result
+       self.fitted = True
+       return self
 
 
  def summary(self, calibration_date=None):
