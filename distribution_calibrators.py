@@ -82,7 +82,7 @@ class DistributionLPPLCalibrator_for_different_Windows:
         """Fit a single LPPLS model using multistart."""
         model = ModelLPPLS(t, p)
         try:
-            model.fit_multistar(n_runs=n_runs, tol=tol)
+            model.fit_multistart(n_runs=n_runs, tol=tol)
         except Exception:
             return None
         return model if model.fitted else None
