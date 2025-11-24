@@ -146,7 +146,7 @@ class ModelLPPLS:
 
         return self
     
-    def fit_multistart(self, n_runs: int = 10, tol: float = 0.01):
+    def fit_multistart(self, n_runs = 10, tol = 0.01):
         """
         Robust multistart fitting: run several fits with randomized initial guesses
         and keep the best run (lowest RMSE) among those that pass the qualified-fit check.
