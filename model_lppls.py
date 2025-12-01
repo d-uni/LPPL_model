@@ -64,7 +64,7 @@ class ModelLPPLS:
     def _check_bounds(self, tc: float, m: float, omega: float) -> bool:
         """Stylized LPPL parameter constraints (Filimonov–Sornette)."""
         return (
-            self.t[-1] < tc < self.t[-1] + 300 / 365
+            self.t[-1]-60/365 < tc < self.t[-1] + 300 / 365
             and 0.1 <= m <= 0.9
             and 6 <= omega <= 13
         )
@@ -92,18 +92,18 @@ class ModelLPPLS:
         """
         Filimonov–Sornette (2013) qualified fit constraints.
 
-        tc must lie within (-60, 252) days relative to the last observation.
+        tc must lie within (-60, 365) days relative to the last observation.
         m must lie in (0, 1)
         omega must lie in [2, 15]
         """
         tc_lower = - 60 / 365.25
-        tc_upper = 252 / 365.25
+        tc_upper = 365 / 365.25
         tc_rel = tc - self.t[-1]
 
         return (
             tc_lower < tc_rel < tc_upper   # tc in allowed range
-            and 0 < m < 1                  # stricter than optimization bounds
-            and 2 <= omega <= 15           # qualified range
+            and 0+1e-4 < m < 1-1e-4                  # stricter than optimization bounds
+            and 2+1e-4 <= omega <= 15-1e-4           # qualified range
         )
     
     def fit(self, initial_guess, method: str = "Nelder-Mead", options=None):
@@ -163,10 +163,10 @@ class ModelLPPLS:
         Calls self.fit(initial_guess) (no method/options passed).
         Allows negative B (no bubble direction restriction).
         """
-
+        np.random.seed(42)
         best = None
         best_rmse = np.inf
-
+        
         for _ in range(int(n_runs)):
          # Randomized initial guess
          tc0 = self.t[-1] + float(np.random.uniform(0.01, 0.5))
