@@ -64,9 +64,9 @@ class ModelLPPLS:
     def _check_bounds(self, tc: float, m: float, omega: float) -> bool:
         """Stylized LPPL parameter constraints (Filimonov–Sornette)."""
         return (
-            self.t[-1]-60/365 < tc < self.t[-1] + 300 / 365
-            and 0.1 <= m <= 0.9
-            and 6 <= omega <= 13
+            self.t[-1]-90/365 < tc < self.t[-1] + 1
+            and 0 <= m <= 1
+            and 1 <= omega <= 50
         )
 
     def _sse(self, params):
