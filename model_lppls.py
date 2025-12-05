@@ -102,8 +102,8 @@ class ModelLPPLS:
 
         return (
             tc_lower < tc_rel < tc_upper   # tc in allowed range
-            and 0+1e-4 < m < 1-1e-4                  # stricter than optimization bounds
-            and 2+1e-4 <= omega <= 15-1e-4           # qualified range
+            and 0 < m < 1                  # stricter than optimization bounds  0+1e-4 < m < 1-1e-4   
+            and 2 <= omega <= 15           # qualified range 2+1e-4 <= omega <= 15-1e-4 
         )
     
     def fit(self, initial_guess, method: str = "Nelder-Mead", options=None):
