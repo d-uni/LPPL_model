@@ -241,8 +241,8 @@ class ModelLPPLS:
             One-row DataFrame containing:
             calibration_date, tc, A, B, C1, C2, m, omega, r2, rmse, kappa, sign
         """
-     if not self.fitted:
-            raise RuntimeError("Fit the model first using .fit(initial_guess).")
+     # if not self.fitted:
+     #        raise RuntimeError("Fit the model first using .fit(initial_guess).")
 
         # --- Extract fitted parameters ---
         A, B, C1, C2, tc, m, omega = (
