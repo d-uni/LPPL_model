@@ -64,9 +64,9 @@ class ModelLPPLS:
     def _check_bounds(self, tc: float, m: float, omega: float) -> bool:
         """Stylized LPPL parameter constraints (Filimonov–Sornette)."""
         return (
-            self.t[-1] < tc < self.t[-1] + 300 / 365
-            and 0.1 <= m <= 0.9
-            and 6 <= omega <= 13
+            self.t[-1]-90/365 < tc < self.t[-1] + 1
+            and 0 <= m <= 1
+            and 1 <= omega <= 50
         )
 
     def _sse(self, params):
@@ -88,25 +88,24 @@ class ModelLPPLS:
         return A + B * f + C1 * f * np.cos(omega * np.log(dt)) + C2 * f * np.sin(
             omega * np.log(dt)
         )
-        
     def _check_qualified_fit(self, tc: float, m: float, omega: float) -> bool:
         """
-        Filimonov–Sornette (2013) qualified fit constraints (Table 3, right side).
+        Filimonov–Sornette (2013) qualified fit constraints.
 
-        tc must lie within (-60, 252) days relative to the last observation.
+        tc must lie within (-60, 365) days relative to the last observation.
         m must lie in (0, 1)
         omega must lie in [2, 15]
         """
         tc_lower = - 60 / 365.25
-        tc_upper = 252 / 365.25
+        tc_upper = 365 / 365.25
         tc_rel = tc - self.t[-1]
 
         return (
             tc_lower < tc_rel < tc_upper   # tc in allowed range
-            and 0 < m < 1                  # stricter than optimization bounds
-            and 2 <= omega <= 15           # qualified range
+            and 0+1e-4 < m < 1-1e-4                  # stricter than optimization bounds
+            and 2+1e-4 <= omega <= 15-1e-4           # qualified range
         )
-        
+    
     def fit(self, initial_guess, method: str = "Nelder-Mead", options=None):
         """
         Fit the LPPLS model by minimizing the sum of squared errors.
@@ -241,20 +240,20 @@ class ModelLPPLS:
             One-row DataFrame containing:
             calibration_date, tc, A, B, C1, C2, m, omega, r2, rmse, kappa, sign
         """
-     # if not self.fitted:
-     #        raise RuntimeError("Fit the model first using .fit(initial_guess).")
+        if not self.fitted:
+            raise RuntimeError("Fit the model first using .fit(initial_guess).")
 
-        # --- Extract fitted parameters ---
+         # --- Extract fitted parameters ---
         A, B, C1, C2, tc, m, omega = (
             self.params["A"], self.params["B"], self.params["C1"], self.params["C2"],
             self.params["tc"], self.params["m"], self.params["omega"]
-        )
+         )
 
-        # --- Derived parameters ---
+         # --- Derived parameters ---
         kappa = -B
         sign = 1 if kappa > 0 else -1
 
-        # --- Build DataFrame row ---
+         # --- Build DataFrame row ---
         row = {
             "calibration_date": self.calibration_date,
             "tc": tc,
