@@ -96,8 +96,8 @@ class ModelLPPLS:
         m must lie in (0, 1)
         omega must lie in [2, 15]
         """
-        tc_lower = - 60 / 365.25
-        tc_upper = 365 / 365.25
+        tc_lower = - 90 / 365.25
+        tc_upper = 1
         tc_rel = tc - self.t[-1]
 
         return (
@@ -169,7 +169,8 @@ class ModelLPPLS:
         
         for _ in range(int(n_runs)):
          # Randomized initial guess
-         tc0 = self.t[-1] + float(np.random.uniform(0.01, 0.5))
+         #tc0 = self.t[-1] + float(np.random.uniform(0.01, 0.5))
+         tc0 = self.t[-1] + float(np.random.uniform(-90, 365))/365
          m0 = float(np.random.uniform(0.0, 1.0))
          omega0 = float(np.random.uniform(1.0, 50.0))
 
