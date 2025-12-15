@@ -78,7 +78,7 @@ class DistributionLPPLCalibrator_for_different_Windows:
         ss_tot = np.sum((y_true - np.mean(y_true)) ** 2)
         return 1 - ss_res / ss_tot if ss_tot != 0 else np.nan
 
-    def _fit_window(self, t, p):
+    def _fit_window(self, t, p, runs=10):
         """Fit a single LPPLS model to one calibration window."""
         initial_guess = [
             t[-1] + self.model_params["tc_offset"],
@@ -87,7 +87,7 @@ class DistributionLPPLCalibrator_for_different_Windows:
         ]
         model = ModelLPPLS(t, p)
         try:
-            model.fit(initial_guess)
+            model.fit_multistart(n_runs=runs)
         except Exception:
             return None
         return model if model.fitted else None
@@ -228,7 +228,7 @@ class DistributionLPPLCalibrator_for_different_Dates:
         ss_tot = np.sum((y_true - np.mean(y_true)) ** 2)
         return 1 - ss_res / ss_tot if ss_tot != 0 else np.nan
        
-    def _fit_window(self, t, p):
+    def _fit_window(self, t, p, runs=10):
         """Fit a single LPPLS model to a specific calibration window."""
         initial_guess = [
             t[-1] + self.model_params["tc_offset"],
@@ -237,7 +237,7 @@ class DistributionLPPLCalibrator_for_different_Dates:
         ]
         model = ModelLPPLS(t, p)
         try:
-            model.fit(initial_guess)
+            model.fit_multistart(n_runs=runs)
         except Exception:
             return None
         return model if model.fitted else None
